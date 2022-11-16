@@ -31,7 +31,7 @@ int main(int argc, char *argv[])
 	while (shell_interaction)/* if interactive */
 	{
 		/* Shell prompt */
-		write(1, "($) ", 4);
+		write(1, " $ ", 4);
 		num_tokens = 0; /* resets token count to 0 */
 		i = getline(&line, &bufsize, stdin); /* grabs input */
 		if (i < 0)
