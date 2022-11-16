@@ -1,60 +1,95 @@
-#include "main.h"
-/**
- * checkbltin - checks if the command entered is a built-in
- * @line: input entered by user
- * @ar: array that can be handled by execve
- * @newline: duplicate of line
- * @array: Tokens to check
- * Return: Return depends upon if the built-in was found
- */
-int checkbltin(char *line, char **ar, char *newline, char **array)
-{
-	int i = 0;
+#include "shell.h"
 
-	if (_strcmp(ar[0], "exit") == 0) /* compares first token to exit */
+/**
+ * _myexit - exits the shell
+ * @info: Structure containing potential arguments. Used to maintain
+ *          constant function prototype.
+ *  Return: exits with a given exit status
+ *         (0) if info.argv[0] != "exit"
+ */
+int _myexit(info_t *info)
+{
+	int exitcheck;
+
+	if (info->argv[1])  /* If there is an exit argument */
 	{
-		myfree(line, ar, newline, array);
-		_exit(errno); /* exits with status 0 or errno */
-	}
-	if (_strcmp(ar[0], "env") == 0) /* compares first token to env */
-	{
-		for (i = 0; environ[i] != NULL; i++)
+		exitcheck = _erratoi(info->argv[1]);
+		if (exitcheck == -1)
 		{
-			_puts(environ[i]); /* prints string of environ */
-			write(1, "\n", 1);
+			info->status = 2;
+			print_error(info, "Illegal number: ");
+			_eputs(info->argv[1]);
+			_eputchar('\n');
+			return (1);
 		}
-		return (2);
+		info->err_num = _erratoi(info->argv[1]);
+		return (-2);
 	}
-	if (_strcmp(ar[0], "cd") == 0) /* compares first token to exit */
+	info->err_num = -1;
+	return (-2);
+}
+/**
+ * _mycd - changes the current directory of the process
+ * @info: Structure containing potential arguments. Used to maintain
+ *          constant function prototype.
+ *  Return: Always 0
+ */
+int _mycd(info_t *info)
+{
+	char *s, *dir, buffer[1024];
+	int chdir_ret;
+
+	s = getcwd(buffer, 1024);
+	if (!s)
+		_puts("TODO: >>getcwd failure emsg here<<\n");
+	if (!info->argv[1])
 	{
-		changedir(ar);
-		return (2); /* go back to shell loop */	}
+		dir = _getenv(info, "HOME=");
+		if (!dir)
+			chdir_ret = /* TODO: what should this be? */
+				chdir((dir = _getenv(info, "PWD=")) ? dir : "/");
+		else
+			chdir_ret = chdir(dir);
+	}
+	else if (_strcmp(info->argv[1], "-") == 0)
+	{
+		if (!_getenv(info, "OLDPWD="))
+		{
+			_puts(s);
+			_putchar('\n');
+			return (1);
+		}
+		_puts(_getenv(info, "OLDPWD=")), _putchar('\n');
+		chdir_ret = /* TODO: what should this be? */
+			chdir((dir = _getenv(info, "OLDPWD=")) ? dir : "/");
+	}
+	else
+		chdir_ret = chdir(info->argv[1]);
+	if (chdir_ret == -1)
+	{
+		print_error(info, "can't cd to ");
+		_eputs(info->argv[1]), _eputchar('\n');
+	}
+	else
+	{
+		_setenv(info, "OLDPWD", _getenv(info, "PWD="));
+		_setenv(info, "PWD", getcwd(buffer, 1024));
+	}
 	return (0);
 }
 /**
- * changedir - changes directory to ar
- * @ar: the directory to change to or nothing
+ * _myhelp - changes the current directory of the process
+ * @info: Structure containing potential arguments. Used to maintain
+ *          constant function prototype.
+ *  Return: Always 0
  */
-void changedir(char **ar)
+int _myhelp(info_t *info)
 {
-	int i = 0;
-	char *homeval = NULL, *home = NULL;
+	char **arg_array;
 
-	if (ar[1] == NULL)
-	{ /* if cd is by itself */
-		for (i = 0; environ[i] != NULL; i++) /* loops through environ */
-		{
-			if (_strncmp("HOME=", environ[i], 5) == 0)
-			{ /* find the line matching home */
-				home = _strdup(environ[i]);
-				strtok(home, "="); /* stores its value */
-				homeval = strtok(NULL, "=");
-				break;
-			}
-		}
-	}
-	else
-		homeval = ar[1]; /* homeval is set to 2nd arg */
-	chdir(homeval); /* change directory to homeval */
-	free(home);
+	arg_array = info->argv;
+	_puts("help call works. Function not yet implemented \n");
+	if (0)
+		_puts(*arg_array); /* temp att_unused workaround */
+	return (0);
 }
