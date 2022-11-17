@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Simple Shell project 0x16.'OMYSHELL'
 
 This is a simple UNIX command interpreter based on bash and Sh.
@@ -23,3 +24,7 @@ gcc -Wall -Werror -Wextra -pedantic *.c -o omyshell
 
 * MAUREEN OMONDI
 * Patroba omollo
+=======
+#!/bin/bash
+echo "file"
+>>>>>>> 70151cb5fed0d19ecffc8d8aff31ba4be94f8f47
